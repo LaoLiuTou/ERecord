@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.erecord.dao.unit.IUnitMapper"> 
+	<select id="selectunitById" parameterType="String" resultType="Unit">
+		SELECT * FROM unit WHERE ID=#{id}
+	</select>
+
+	<delete id="deleteunit" parameterType="String"> 
+		DELETE FROM unit WHERE ID=#{id}
+	</delete>
+
+	<select id="selectunitByParam" parameterType="java.util.Map" resultType="Unit">
+		SELECT *
+		FROM unit
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="id != null"> AND ID =#{id} </if>
+			<if test="name != null"> AND NAME like #{name} </if>
+			<if test="phone != null"> AND PHONE =#{phone} </if>
+			<if test="comment != null"> AND COMMENT =#{comment} </if>
+			<if test="count != null"> AND COUNT =#{count} </if>
+			<if test="usecount != null"> AND USECOUNT =#{usecount} </if>
+			<if test="c_id != null"> AND C_ID =#{c_id} </if>
+			<if test="c_dtFrom != null"> AND unix_timestamp(C_DT) &gt;=unix_timestamp(#{c_dtFrom}) </if>
+			<if test="c_dtTo != null"> AND unix_timestamp(C_DT) &lt;=unix_timestamp(#{c_dtTo}) </if>
+			<if test="c_dt != null"> AND C_DT =#{c_dt} </if>
+			<if test="u_dtFrom != null"> AND unix_timestamp(U_DT) &gt;=unix_timestamp(#{u_dtFrom}) </if>
+			<if test="u_dtTo != null"> AND unix_timestamp(U_DT) &lt;=unix_timestamp(#{u_dtTo}) </if>
+			<if test="u_dt != null"> AND U_DT =#{u_dt} </if>
+			<if test="state != null"> AND STATE =#{state} </if>
+		</trim>  
+			<if test="orderBy!= null"> ORDER BY   #{orderBy} </if>
+		LIMIT #{fromPage},#{toPage} 
+	</select>
+
+	<select id="selectCountunitByParam" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(id) 
+		FROM unit 
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="id != null"> AND ID =#{id} </if>
+			<if test="name != null"> AND NAME like #{name} </if>
+			<if test="phone != null"> AND PHONE =#{phone} </if>
+			<if test="comment != null"> AND COMMENT =#{comment} </if>
+			<if test="count != null"> AND COUNT =#{count} </if>
+			<if test="usecount != null"> AND USECOUNT =#{usecount} </if>
+			<if test="c_id != null"> AND C_ID =#{c_id} </if>
+			<if test="c_dtFrom != null"> AND unix_timestamp(C_DT) &gt;=unix_timestamp(#{c_dtFrom}) </if>
+			<if test="c_dtTo != null"> AND unix_timestamp(C_DT) &lt;=unix_timestamp(#{c_dtTo}) </if>
+			<if test="c_dt != null"> AND C_DT =#{c_dt} </if>
+			<if test="u_dtFrom != null"> AND unix_timestamp(U_DT) &gt;=unix_timestamp(#{u_dtFrom}) </if>
+			<if test="u_dtTo != null"> AND unix_timestamp(U_DT) &lt;=unix_timestamp(#{u_dtTo}) </if>
+			<if test="u_dt != null"> AND U_DT =#{u_dt} </if>
+			<if test="state != null"> AND STATE =#{state} </if>
+		</trim>  
+	</select>
+
+	<update id="updateunit" parameterType="Unit">
+		UPDATE unit 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="id != null">ID=#{id}, </if>
+			<if test="name != null">NAME=#{name}, </if>
+			<if test="phone != null">PHONE=#{phone}, </if>
+			<if test="comment != null">COMMENT=#{comment}, </if>
+			<if test="count != null">COUNT=#{count}, </if>
+			<if test="usecount != null">USECOUNT=#{usecount}, </if>
+			<if test="c_id != null">C_ID=#{c_id}, </if>
+			<if test="c_dt != null">C_DT=#{c_dt}, </if>
+			<if test="u_dt != null">U_DT=#{u_dt}, </if>
+			<if test="state != null">STATE=#{state}, </if>
+		</trim>
+		WHERE ID=#{id}
+	</update>
+
+	<insert id="addunit" parameterType="Unit" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO unit 
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="name != null">NAME, </if>
+			<if test="phone != null">PHONE, </if>
+			<if test="comment != null">COMMENT, </if>
+			<if test="count != null">COUNT, </if>
+			<if test="usecount != null">USECOUNT, </if>
+			<if test="c_id != null">C_ID, </if>
+			<if test="c_dt != null">C_DT, </if>
+			<if test="u_dt != null">U_DT, </if>
+			<if test="state != null">STATE, </if>
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+			<if test="name != null">#{name}, </if>
+			<if test="phone != null">#{phone}, </if>
+			<if test="comment != null">#{comment}, </if>
+			<if test="count != null">#{count}, </if>
+			<if test="usecount != null">#{usecount}, </if>
+			<if test="c_id != null">#{c_id}, </if>
+			<if test="c_dt != null">#{c_dt}, </if>
+			<if test="u_dt != null">#{u_dt}, </if>
+			<if test="state != null">#{state}, </if>
+		</trim>
+	</insert>
+
+	<insert id="muladdunit" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+		<foreach collection="list" item="item" index="index" open=""
+			close="" separator=";">
+			INSERT INTO unit 
+			<trim prefix="(" suffix=")" suffixOverrides="," >
+				<if test="item.id != null">ID, </if>
+				<if test="item.name != null">NAME, </if>
+				<if test="item.phone != null">PHONE, </if>
+				<if test="item.comment != null">COMMENT, </if>
+				<if test="item.count != null">COUNT, </if>
+				<if test="item.usecount != null">USECOUNT, </if>
+				<if test="item.c_id != null">C_ID, </if>
+				<if test="item.c_dt != null">C_DT, </if>
+				<if test="item.u_dt != null">U_DT, </if>
+				<if test="item.state != null">STATE, </if>
+			</trim>
+			<trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+				<if test="item.id != null">#{item.id}, </if>
+				<if test="item.name != null">#{item.name}, </if>
+				<if test="item.phone != null">#{item.phone}, </if>
+				<if test="item.comment != null">#{item.comment}, </if>
+				<if test="item.count != null">#{item.count}, </if>
+				<if test="item.usecount != null">#{item.usecount}, </if>
+				<if test="item.c_id != null">#{item.c_id}, </if>
+				<if test="item.c_dt != null">#{item.c_dt}, </if>
+				<if test="item.u_dt != null">#{item.u_dt}, </if>
+				<if test="item.state != null">#{item.state}, </if>
+			</trim>
+		</foreach>
+	</insert>
+</mapper>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>登录</title>
+    <link rel="stylesheet" type="text/css"  href="css/m_style.css" />
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
+
+</head>
+<body>
+
+<div class="login-out">
+
+    <form class="login-form">
+
+        <h4 class="login-h4">登录</h4>
+
+        <div class="form-group">
+            <div class="col-sm-12">
+                <input type="text" id="username" class="login-inp" placeholder="请输入账号">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-12">
+                <input type="password" id="password" class="login-inp" placeholder="请输入密码">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-12">
+                <button type="button" class="login-btn" id="submit" >登录</button>
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="Modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!--<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>-->
+                <h4 class="modal-title" id="myModalLabel">选择卡点</h4>
+            </div>
+            <ul id="selectCp" class="modal-body kadian-box">
+
+            </ul>
+
+        </div>
+    </div>
+</div>
+<script src="js/main/config.js?v=1.5"></script>
+<script type="text/javascript">
+    var cpList;
+    $(document).ready(function(){
+        $('#submit').click(function() {
+
+            if ($('#username').val() == '') {
+                alert('用户名不能为空！');
+                return false;
+            } else if ($('#password').val() == '') {
+                alert('密码不能为空！');
+                return false;
+            }
+
+            $.ajax({
+                url : url+'mlogin',
+                type : 'POST',
+                data : {
+                    'username' : $('#username').val(),
+                    'password' : $('#password').val()
+                },
+                success : function(response) {
+                    //console.log(JSON.stringify(response));
+                    if(response['status']=='0'){
+                        var token = response['token'];
+                        var userinfo = JSON.stringify(response['msg']);
+                        //var timestamp = Date.parse(new Date());
+                        //var hash = md5(token + timestamp + sk);
+
+                        cpList= response['cp'];
+
+                        sessionStorage.setItem('username',$('#username').val());
+                        sessionStorage.setItem('userpwd',$('#password').val());
+                        sessionStorage.setItem('userinfo',userinfo);
+                        sessionStorage.setItem('token',token);
+                        sessionStorage.setItem('cpList',JSON.stringify(cpList));
+
+
+                        var html='';
+                        for(var o in cpList){
+                            html+='<li index='+o+' class="cpLi" id='+cpList[o].id+'>'+cpList[o].name+'</li>';
+                        }
+                        $('#selectCp').html(html);
+                        $('#Modal').modal('show');
+                        //window.location.href='default-page.html?backurl='+window.location.href;
+                        //window.location.href='index.html';
+                    }
+                    else{
+                        alert(response['msg']);
+                    }
+
+                },
+                error : function(response) {
+                    alert('登录失败！');
+                }
+            });
+        });
+
+        $('#selectCp').on('click','.cpLi',function() {
+
+            sessionStorage.setItem('cpinfo',JSON.stringify(cpList[$(this).attr('index')]));
+            //console.log(JSON.parse(sessionStorage.getItem('cpinfo')));
+            window.location.href='m_index.html';
+        })
+
+    });
+</script>
+</body>
+</html>

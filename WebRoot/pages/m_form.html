@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>居民出入登记</title>
+    <link rel="stylesheet" type="text/css"  href="css/m_style.css" />
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/upload.js"></script>
+
+</head>
+<body class="body-form">
+
+<div class="">
+
+    <div class="titlebox-form">
+        <i class="glyphicon glyphicon-chevron-left icon-back"></i>
+        <span>居民出入管理系统</span>
+    </div>
+
+    <form class="" id="addForm">
+
+        <div class="form-group m-t60">
+            <label class="label-f">上传身份证</label>
+            <div class="inp-f text-center">
+                <input type="file" id="imgFile" style="display: none;" capture='camera' accept='image/*'>
+                <img id="idphoto" src="images/id_icon.png" style="width:80%;height: auto;margin: 15px  auto;">
+                <input type="text" id="img" class="form-inp"  value=""  style="display: none;">
+                <input type="text" id="location" class="form-inp"  value=""  style="display: none;">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="label-f">手机号码</label>
+            <div class="inp-f">
+                <input type="number" id="phone" class="form-inp" oninput="if(this.value=='00'){this.value='0';}else{this.value=this.value.replace(/[^0-9]/g,'')}" placeholder="请输入电话号码">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="label-f">姓名</label>
+            <div class="inp-f">
+                <input type="text" id="name" class="form-inp" placeholder="请输入姓名">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="label-f">身份证号码</label>
+            <div class="inp-f">
+                <input type="text" id="idnumber" class="form-inp" placeholder="请输入身份证号码">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="label-f">备注</label>
+            <div class="inp-f">
+                <textarea  id="comment" class="form-inp" style="height: 100px;"  placeholder="请输入备注"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="label-f">出入情况</label>
+            <div class="inp-f">
+                <div class="col-sm-10">
+                    <div class="radio-f-box bd-bottom">
+                        <input type="radio" name="inorout" id="in" value="进入" checked class="radio-f" />
+                        <label for="in">进入</label>
+                    </div>
+                    <div class="radio-f-box">
+                        <input type="radio" name="inorout" id="out" value="外出" class="radio-f" />
+                        <label for="out">外出</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="label-f">卡点名称</label>
+            <div class="inp-f">
+                <input type="text" id="cp_name" class="form-inp"  value="" disabled>
+
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="label-f">时间</label>
+            <div class="inp-f">
+                <input type="text" id="dt" class="form-inp"  value="" disabled>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-12">
+                <button type="button" id="addBtn" class="login-btn">提交</button>
+            </div>
+        </div>
+
+    </form>
+
+</div>
+
+<!--loading-->
+<div id="loading" style="display: none;">
+    <div class="loading-box ">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-body">
+
+                    <i class="xuanzhuan-icon"></i>
+
+                    <p>正在识别身份证...</p>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="loading-shadow-box"></div>
+</div>
+<!--loading-end-->
+
+<script src="js/main/config.js?v=1.5"></script>
+<script src="js/main/md5.js"></script>
+<script src="js/main/er_records.js"></script>
+<!--<script src="http://api.map.baidu.com/api?v=1.2" type="text/javascript"></script>-->
+<script type="text/javascript">
+    //经度
+    var longitude ;
+    //纬度
+    var latitude ;
+
+
+    $(document).ready(function(){
+        var userinfo = JSON.parse(sessionStorage.getItem('userinfo'));
+        if(sessionStorage.getItem('userinfo')==null){
+            window.location.href='m_login.html';
+        }
+
+        $('.icon-back').click(function () {
+            window.history.go(-1);
+        });
+
+        //位置
+        getLocation();
+
+
+        var cpInfo = JSON.parse(sessionStorage.getItem('cpinfo'));
+        if(cpInfo!=null){
+            $('#cp_name').val(cpInfo.name);
+        }
+
+        $('#dt').val(new Date().format("yyyy-MM-dd hh:mm:ss"));
+
+        //add
+        $('#addBtn').click(function () {
+            var params={};
+            if($('#img').val()==''){
+                alert("请上传身份证正面照片！");
+                return;
+            }
+            if($('#name').val()==''){
+                alert("身份证识别姓名错误！");
+                return;
+            }
+            if($('#idnumber').val()==''){
+                alert("身份证号码识别错误，请重试或者手动输入！");
+                return;
+            }
+            /*if(!checkMobile($('#phone').val())){
+                alert("请输入正确的手机号码，请重试或者手动输入！");
+                return;
+            }*/
+
+
+            $('#addForm input').each(function () {
+                if($(this).val()!='')
+                    params[$(this).attr('id')]=$(this).val();
+            });
+            $('#addForm select').each(function () {
+                if($(this).val()!='')
+                    params[$(this).attr('id')]=$(this).val();
+            });
+            params['comment']=$('#comment').val();
+            params['c_id']=userinfo['id'];
+            params['unit_id']=userinfo['unit_id'];
+            params['cp_id']=cpInfo.id;
+            params['inorout']=$('input:radio[name=inorout]:checked').val();
+            //console.log(params);
+            addRecordsM(params);
+        });
+
+        $('#idphoto').click(function(){
+            $('#imgFile').click();
+
+        });
+        //上传图片
+        $("#imgFile").bind('change', function (e) {
+
+            var src, wurl = window.URL || window.webkitURL || window.mozURL,
+                files = e.target.files;
+            for(var i = 0, len = files.length; i < len; ++i) {
+                var file = files[i];
+
+                if(wurl) {
+                    src = wurl.createObjectURL(file);
+                } else {
+                    src = e.target.result;
+                }
+
+            }
+            $('#idphoto').prop('src',src);
+
+            var file = $("#imgFile").val();
+            if(file.length>0) {
+                //压缩
+                var filePath = $(this).val(),
+                    imgBase64 = '',      //存储图片的imgBase64
+                    fileObj = files[0]; //上传文件的对象,要这样写才行，用jquery写法获取不到对象
+
+                // 调用函数，对图片进行压缩
+                compress(fileObj,function(imgBase64){
+                    imgBase64 = imgBase64;    //存储转换的base64编码
+                    file = dataURLtoFile(imgBase64, "idcard.png");
+
+                    var formData = new FormData();
+                    formData.append("files",file);
+                    //单位信息 识别数量限制
+                    formData.append("unit_id",userinfo['unit_id']);
+
+                    $('#loading').show();
+                    $.ajax({
+                        type: "post",
+                        url: url +"filesUpload",
+                        data: formData,
+                        contentType: false, // 注意这里应设为false
+                        processData: false,    //false
+                        cache: false,    //缓存
+                        success: function(response){
+                            var status = response['status'];
+                            console.log(response);
+                            if(status=='0'){
+                                var image=response['data'];
+                                var info=response['info'];
+                                console.log(image);
+                                if(info[0]['status']=='0'){
+                                    var idInfo=info[0]['msg'];
+                                    $('#img').val(image[0]);
+                                    $('#name').val(idInfo['name']);
+                                    $('#idnumber').val(idInfo['idnumber']);
+                                }
+                                else{
+                                    alert("图片识别失败,请重试！");
+                                }
+
+                            }
+                            else{
+                                //$.toast("上传文件失败！", "text");
+                                alert(response['data']);
+                            }
+                            $('#loading').hide();
+                        },
+                        error:function(response){
+                            $('#loading').hide();
+                        }
+                    })
+                });
+
+
+            }
+
+
+
+        });
+
+
+    });
+    function checkMobile(string) {
+        var pattern = /^1[3456789]\d{9}$/;
+        if (pattern.test(string)) {
+            return true;
+        }
+        return false;
+    }
+
+
+    //图片处理
+
+    function dataURLtoBlob (dataurl) {
+        var arr = dataurl.split(','),
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]),
+            n = bstr.length,
+            u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], { type: mime });
+    }
+    //将blob转换为file
+    function blobToFile(theBlob, fileName){
+        theBlob.lastModifiedDate = new Date();
+        theBlob.name = fileName;
+        return theBlob;
+    }
+    function dataURLtoFile(dataurl, filename) {
+        var arr = dataurl.split(','),
+            mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]),
+            n = bstr.length,
+            u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new File([u8arr], filename, { type: mime });
+    }
+
+
+
+    // 不对图片进行压缩，直接转成base64
+    function directTurnIntoBase64(fileObj,callback){
+        var r = new FileReader();
+        // 转成base64
+        r.onload = function(){
+            //变成字符串
+            imgBase64 = r.result;
+            console.log(imgBase64);
+            callback(imgBase64);
+        }
+        r.readAsDataURL(fileObj);    //转成Base64格式
+    }
+
+
+
+
+    // 对图片进行压缩
+    function compress(fileObj, callback) {
+        if ( typeof (FileReader) === 'undefined') {
+            console.log("当前浏览器内核不支持base64图标压缩");
+            //调用上传方式不压缩
+            directTurnIntoBase64(fileObj,callback);
+        } else {
+            try {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var image = $('<img/>');
+                    image.load(function(){
+                        var w = this.naturalWidth, h = this.naturalHeight,
+                            offsetX = 0,offsetY = 0, resizeW = this.naturalWidth/2, resizeH = this.naturalHeight/2,
+                            canvas = document.createElement('canvas'),
+                            context = canvas.getContext('2d');
+
+                        canvas.width = resizeW;
+                        canvas.height = resizeH;
+                        context.clearRect(0, 0, w, h);
+                        context.drawImage(this, offsetX, offsetY, resizeW, resizeH);
+                        var data = canvas.toDataURL('image/jpeg');
+                        //压缩完成执行回调
+                        callback(data);
+                    });
+                    image.attr('src', e.target.result);
+                };
+                reader.readAsDataURL(fileObj);
+            }catch(e){
+                console.log("压缩失败!");
+                //调用直接上传方式  不压缩
+                directTurnIntoBase64(fileObj,callback);
+            }
+        }
+    }
+    /*var dragImgUpload = new DragImgUpload("#drop_area",{
+        callback:function (files) {
+            //回调函数，可以传递给后台等等
+            var file = files[0];
+            //console.log(file.name);
+            //
+            $('#drop_area').css('width','200px');
+            var formData = new FormData();
+            formData.append("files",file);
+
+            $('#loading').show();
+            $.ajax({
+                type: "post",
+                url: url +"filesUpload",
+                data: formData,
+                contentType: false, // 注意这里应设为false
+                processData: false,    //false
+                cache: false,    //缓存
+                success: function(response){
+                    var status = response['status'];
+                    console.log(response);
+                    if(status=='0'){
+                        var image=response['data'];
+                        var info=response['info'];
+                        console.log(image);
+                        if(info[0]['status']=='0'){
+                            var idInfo=info[0]['msg'];
+                            $('#img').val(image[0]);
+                            $('#name').val(idInfo['name']);
+                            $('#idnumber').val(idInfo['idnumber']);
+                        }
+                        else{
+                            alert("图片识别失败,请重试！");
+                        }
+
+                    }
+                    else{
+                        //$.toast("上传文件失败！", "text");
+                        alert("上传文件失败,请重试！");
+                    }
+                    $('#loading').hide();
+                },
+                error:function(response){
+                    $('#loading').hide();
+                }
+            })
+
+        }
+    })*/
+
+    function getLocation(){
+        var options={
+            enableHighAccuracy:true,
+            maximumAge:1000
+        }
+        if(navigator.geolocation){
+            //浏览器支持geolocation
+            navigator.geolocation.getCurrentPosition(onSuccess,onError,options);
+        }else{
+            //浏览器不支持geolocation
+            alert('您的浏览器不支持地理位置定位');
+        }
+    }
+    //成功时
+    function onSuccess(position){
+        //返回用户位置
+        //经度
+        longitude =position.coords.longitude;
+        //纬度
+        latitude = position.coords.latitude;
+        //alert('经度'+longitude+'，纬度'+latitude);
+
+        var location={'longitude':longitude,'latitude':latitude};
+        $('#location').val(JSON.stringify(location));
+        //根据经纬度获取地理位置，不太准确，获取城市区域还是可以的
+        /*var map = new BMap.Map("allmap");
+        var point = new BMap.Point(longitude,latitude);
+        var gc = new BMap.Geocoder();
+        gc.getLocation(point, function(rs){
+            var addComp = rs.addressComponents;
+            alert(addComp.province + ", " + addComp.city + ", " + addComp.district + ", " + addComp.street + ", " + addComp.streetNumber);
+        });*/
+    }
+    //失败时
+    function onError(error){
+        var location={};
+        switch(error.code){
+            case 1:
+                console.log("位置服务被拒绝");
+                location={'error':'位置服务被拒绝'}
+                break;
+            case 2:
+                console.log("暂时获取不到位置信息");
+                location={'error':'暂时获取不到位置信息'}
+                break;
+            case 3:
+                console.log("获取信息超时");
+                location={'error':'获取信息超时'}
+                break;
+            case 4:
+                console.log("未知错误");
+                location={'error':'未知错误'}
+                break;
+        }
+
+        $('#location').val(JSON.stringify(location));
+    }
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>首页</title>
+    <link rel="stylesheet" type="text/css"  href="css/m_style.css" />
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+
+
+</head>
+<body class="body-green">
+
+<div class="content-out" onclick="">
+
+    <div class="titlebox">
+        <span class="fl">居民出入管理系统</span>
+
+        <div class="userexit-box fr">
+            <a id="name" href="javascript:;" class="username-atitword fl btn-user-name" onclick="">用户名</a>
+            <b class="caret"></b>
+            <ul class="topbar-nav-rul">
+                <li><a id="cp_name" href="#">当前:卡点一</a></li>
+                <li><a   href="#" data-toggle="modal" data-target="#logout-box"><i class="glyphicon glyphicon-off"></i>退出</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div class="btn1-box" id="addRecord">
+        <img class="icon1" src="images/icon1.png">
+        <p>居民出入登记</p>
+    </div>
+
+    <div class="btn2-box" id="searchRecord">
+        查询历史记录
+    </div>
+    
+</div>
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="Modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" >
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!--<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>-->
+                <h4 class="modal-title" id="myModalLabel">选择卡点</h4>
+            </div>
+            <ul id="selectCp" class="modal-body kadian-box">
+
+            </ul>
+
+        </div>
+    </div>
+</div>
+<div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="logout-box" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">提示</h4>
+            </div>
+            <div class="modal-body">
+                确定要退出登录吗？
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-default" type="button">取消</button>
+                <button class="btn btn-info popovers" type="button" id="logout">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var cpList,userInfo,cpInfo;
+    $(document).ready(function(){
+        if(sessionStorage.getItem('userinfo')==null){
+            window.location.href='m_login.html';
+        }
+        cpList=JSON.parse(sessionStorage.getItem('cpList'));
+        userInfo=JSON.parse(sessionStorage.getItem('userinfo'));
+        cpInfo=JSON.parse(sessionStorage.getItem('cpinfo'))
+
+        if(userInfo!=null){
+            $('#name').text(userInfo.nickname);
+        }
+        if(cpInfo!=null){
+            $('#cp_name').text('当前:'+cpInfo.name);
+        }
+
+
+
+        $('#addRecord').click(function() {
+            window.location.href='m_form.html';
+        });
+        $('#searchRecord').click(function() {
+            window.location.href='m_list.html';
+        });
+
+        $('#name').click(function(event){
+            $(".topbar-nav-rul").toggle('fast');
+            event.stopPropagation();
+        });
+
+        $('.content-out').click(function(event){
+            $(".topbar-nav-rul").hide('fast');
+        });
+
+        $('#cp_name').click(function () {
+            var html='';
+            for(var o in cpList){
+                html+='<li index='+o+' class="cpLi" id='+cpList[o].id+'>'+cpList[o].name+'</li>';
+            }
+            $('#selectCp').html(html);
+            $('#Modal').modal('show');
+        });
+        $('#selectCp').on('click','.cpLi',function() {
+            sessionStorage.setItem('cpinfo',JSON.stringify(cpList[$(this).attr('index')]));
+            cpInfo=JSON.parse(sessionStorage.getItem('cpinfo'))
+            $('#cp_name').text('当前:'+cpInfo.name);
+            $('#Modal').modal('hide')
+        })
+
+
+        $('#logout').click(function () {
+            sessionStorage.clear();
+            window.location.href='m_login.html';
+        });
+
+    });
+</script>
+</body>
+</html>

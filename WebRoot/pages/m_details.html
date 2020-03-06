@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>查看详情</title>
+    <link rel="stylesheet" type="text/css"  href="css/m_style.css" />
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery-1.8.3.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/upload.js"></script>
+
+</head>
+<body class="">
+
+<div class="list-out">
+
+    <div class="titlebox-form">
+        <i class="glyphicon glyphicon-chevron-left icon-back"></i>
+        <span>查看详情</span>
+    </div>
+
+    <ul class="list-ul-out-detail">
+        <li>
+            <div class="text-center m-b15">
+                <img class="details-img" id="img" src="">
+            </div>
+            <p class="list-name ">
+                <img class="user-img" src="images/user.png">
+                <span  id="name"></span>
+                <span class="fr text-right">电话：<span  id="phone"></span></span>
+            </p>
+            <p class="list-name-small">
+                身份证号
+                <span class="fr text-right" id="idnumber"></span>
+            </p>
+
+            <p class="list-name-small">
+                进出情况
+                <span class="fr text-right" id="inorout"></span>
+            </p>
+            <p class="list-name-small">
+                备注
+                <span class="fr text-right" id="comment"></span>
+            </p>
+            <p class="list-name-small">
+                单位
+                <span class="fr text-right" id="unit_name"></span>
+            </p>
+            <p class="list-name-small">
+                卡点名称
+                <span class="fr text-right" id="cp_name"></span>
+            </p>
+            <p class="list-name-small">
+                检查员
+                <span class="fr text-right" id="c_name"></span>
+            </p>
+            <p class="list-name-small">
+                时间
+                <span class="fr text-right" id="dt"></span>
+            </p>
+        </li>
+
+    </ul>
+
+
+
+</div>
+<script src="js/main/config.js?v=1.5"></script>
+<script src="js/main/md5.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('.icon-back').click(function () {
+            window.history.go(-1);
+        });
+
+        var bodyParam={'id':GetQueryString('id')};
+        var httpR = new createHttpM(url+'selectRecords','post','text',bodyParam,'callBack');
+        httpR.HttpRequest(function(response){
+            var obj = JSON.parse(response);
+            var status = obj['status'];
+            //var msg = obj['msg'];
+            if(status=='0'){
+                var data = obj['msg'];
+                for (var item in data) {
+                    if(item=='img'){
+                        $('#img').prop('src',data[item]);
+                    }
+                    else{
+                        $('#'+item).text(data[item]);
+                    }
+                }
+            }
+        });
+
+    });
+
+</script>
+
+
+</body>
+
+
+
+</html>

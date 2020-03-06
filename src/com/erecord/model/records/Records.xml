@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.erecord.dao.records.IRecordsMapper"> 
+	<select id="selectrecordsById" parameterType="String" resultType="Records">
+		SELECT a.*,b.name as unit_name ,c.name as cp_name,d.username as c_username ,d.nickname as c_name  
+		FROM records a 
+		LEFT JOIN unit b 
+		ON a.unit_id=b.id 
+		LEFT JOIN checkpoint c 
+		ON a.cp_id=c.id 
+		LEFT JOIN user d 
+		ON a.c_id=d.id 
+		WHERE a.ID=#{id}
+	</select>
+
+	<delete id="deleterecords" parameterType="String"> 
+		DELETE FROM records WHERE ID=#{id}
+	</delete>
+
+	<select id="selectrecordsByParam" parameterType="java.util.Map" resultType="Records">
+	 
+		SELECT a.*,b.name as unit_name ,c.name as cp_name ,d.username as c_username  ,d.nickname as c_name  
+		FROM records a 
+		LEFT JOIN unit b 
+		ON a.unit_id=b.id 
+		LEFT JOIN checkpoint c 
+		ON a.cp_id=c.id 
+		LEFT JOIN user d 
+		ON a.c_id=d.id 
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="id != null"> AND a.ID =#{id} </if>
+			<if test="name != null"> AND a.NAME =#{name} </if>
+			<if test="idnumber != null"> AND a.IDNUMBER =#{idnumber} </if>
+			<if test="img != null"> AND a.IMG =#{img} </if>
+			<if test="phone != null"> AND a.PHONE =#{phone} </if>
+			<if test="inorout != null"> AND a.INOROUT =#{inorout} </if>
+			<if test="comment != null"> AND a.COMMENT =#{comment} </if>
+			<if test="cp_id != null"> AND a.CP_ID =#{cp_id} </if>
+			<if test="unit_id != null"> AND a.UNIT_ID =#{unit_id} </if>
+			<if test="dtFrom != null"> AND unix_timestamp(a.DT) &gt;=unix_timestamp(#{dtFrom}) </if>
+			<if test="dtTo != null"> AND unix_timestamp(a.DT) &lt;=unix_timestamp(#{dtTo}) </if>
+			<if test="dt != null"> AND a.DT =#{dt} </if>
+			<if test="c_id != null"> AND a.C_ID =#{c_id} </if>
+			<if test="c_dtFrom != null"> AND unix_timestamp(a.C_DT) &gt;=unix_timestamp(#{c_dtFrom}) </if>
+			<if test="c_dtTo != null"> AND unix_timestamp(a.C_DT) &lt;=unix_timestamp(#{c_dtTo}) </if>
+			<if test="c_dt != null"> AND a.C_DT =#{c_dt} </if>
+			<if test="u_dtFrom != null"> AND unix_timestamp(a.U_DT) &gt;=unix_timestamp(#{u_dtFrom}) </if>
+			<if test="u_dtTo != null"> AND unix_timestamp(a.U_DT) &lt;=unix_timestamp(#{u_dtTo}) </if>
+			<if test="u_dt != null"> AND a.U_DT =#{u_dt} </if>
+			<if test="state != null"> AND a.STATE =#{state} </if>
+			<if test="location != null"> AND a.LOCATION =#{location} </if>
+			<if test="searchText != null"> AND CONCAT(IFNULL(a.NAME,''),' ',IFNULL(a.IDNUMBER,''),' ',IFNULL(a.PHONE,'')) like #{searchText} </if>
+		
+		</trim>  
+			<if test="orderBy!= null"> ORDER BY   ${orderBy} </if>
+		LIMIT #{fromPage},#{toPage} 
+	</select>
+
+	<select id="selectCountrecordsByParam" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(id) 
+		FROM records 
+		<trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="id != null"> AND ID =#{id} </if>
+			<if test="name != null"> AND NAME =#{name} </if>
+			<if test="idnumber != null"> AND IDNUMBER =#{idnumber} </if>
+			<if test="img != null"> AND IMG =#{img} </if>
+			<if test="phone != null"> AND PHONE =#{phone} </if>
+			<if test="inorout != null"> AND INOROUT =#{inorout} </if>
+			<if test="comment != null"> AND COMMENT =#{comment} </if>
+			<if test="cp_id != null"> AND CP_ID =#{cp_id} </if>
+			<if test="unit_id != null"> AND UNIT_ID =#{unit_id} </if>
+			<if test="dtFrom != null"> AND unix_timestamp(DT) &gt;=unix_timestamp(#{dtFrom}) </if>
+			<if test="dtTo != null"> AND unix_timestamp(DT) &lt;=unix_timestamp(#{dtTo}) </if>
+			<if test="dt != null"> AND DT =#{dt} </if>
+			<if test="c_id != null"> AND C_ID =#{c_id} </if>
+			<if test="c_dtFrom != null"> AND unix_timestamp(C_DT) &gt;=unix_timestamp(#{c_dtFrom}) </if>
+			<if test="c_dtTo != null"> AND unix_timestamp(C_DT) &lt;=unix_timestamp(#{c_dtTo}) </if>
+			<if test="c_dt != null"> AND C_DT =#{c_dt} </if>
+			<if test="u_dtFrom != null"> AND unix_timestamp(U_DT) &gt;=unix_timestamp(#{u_dtFrom}) </if>
+			<if test="u_dtTo != null"> AND unix_timestamp(U_DT) &lt;=unix_timestamp(#{u_dtTo}) </if>
+			<if test="u_dt != null"> AND U_DT =#{u_dt} </if>
+			<if test="state != null"> AND STATE =#{state} </if>
+			<if test="location != null"> AND LOCATION =#{location} </if>
+			<if test="searchText != null"> AND CONCAT(IFNULL(NAME,''),' ',IFNULL(IDNUMBER,''),' ',IFNULL(PHONE,'')) like #{searchText} </if>
+		
+		</trim>  
+	</select>
+
+	<update id="updaterecords" parameterType="Records">
+		UPDATE records 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="id != null">ID=#{id}, </if>
+			<if test="name != null">NAME=#{name}, </if>
+			<if test="idnumber != null">IDNUMBER=#{idnumber}, </if>
+			<if test="img != null">IMG=#{img}, </if>
+			<if test="phone != null">PHONE=#{phone}, </if>
+			<if test="inorout != null">INOROUT=#{inorout}, </if>
+			<if test="comment != null">COMMENT=#{comment}, </if>
+			<if test="cp_id != null">CP_ID=#{cp_id}, </if>
+			<if test="unit_id != null">UNIT_ID=#{unit_id}, </if>
+			<if test="dt != null">DT=#{dt}, </if>
+			<if test="c_id != null">C_ID=#{c_id}, </if>
+			<if test="c_dt != null">C_DT=#{c_dt}, </if>
+			<if test="u_dt != null">U_DT=#{u_dt}, </if>
+			<if test="state != null">STATE=#{state}, </if>
+			<if test="location != null">LOCATION=#{location}, </if>
+		</trim>
+		WHERE ID=#{id}
+	</update>
+
+	<insert id="addrecords" parameterType="Records" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO records 
+		<trim prefix="(" suffix=")" suffixOverrides="," >
+			<if test="name != null">NAME, </if>
+			<if test="idnumber != null">IDNUMBER, </if>
+			<if test="img != null">IMG, </if>
+			<if test="phone != null">PHONE, </if>
+			<if test="inorout != null">INOROUT, </if>
+			<if test="comment != null">COMMENT, </if>
+			<if test="cp_id != null">CP_ID, </if>
+			<if test="unit_id != null">UNIT_ID, </if>
+			<if test="dt != null">DT, </if>
+			<if test="c_id != null">C_ID, </if>
+			<if test="c_dt != null">C_DT, </if>
+			<if test="u_dt != null">U_DT, </if>
+			<if test="state != null">STATE, </if>
+			<if test="location != null">LOCATION, </if>
+		</trim>
+		<trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+			<if test="name != null">#{name}, </if>
+			<if test="idnumber != null">#{idnumber}, </if>
+			<if test="img != null">#{img}, </if>
+			<if test="phone != null">#{phone}, </if>
+			<if test="inorout != null">#{inorout}, </if>
+			<if test="comment != null">#{comment}, </if>
+			<if test="cp_id != null">#{cp_id}, </if>
+			<if test="unit_id != null">#{unit_id}, </if>
+			<if test="dt != null">#{dt}, </if>
+			<if test="c_id != null">#{c_id}, </if>
+			<if test="c_dt != null">#{c_dt}, </if>
+			<if test="u_dt != null">#{u_dt}, </if>
+			<if test="state != null">#{state}, </if>
+			<if test="location != null">#{location}, </if>
+		</trim>
+	</insert>
+
+	<insert id="muladdrecords" parameterType="java.util.List" keyProperty="id" useGeneratedKeys="true">
+		<foreach collection="list" item="item" index="index" open=""
+			close="" separator=";">
+			INSERT INTO records 
+			<trim prefix="(" suffix=")" suffixOverrides="," >
+				<if test="item.id != null">ID, </if>
+				<if test="item.name != null">NAME, </if>
+				<if test="item.idnumber != null">IDNUMBER, </if>
+				<if test="item.img != null">IMG, </if>
+				<if test="item.phone != null">PHONE, </if>
+				<if test="item.inorout != null">INOROUT, </if>
+				<if test="item.comment != null">COMMENT, </if>
+				<if test="item.cp_id != null">CP_ID, </if>
+				<if test="item.unit_id != null">UNIT_ID, </if>
+				<if test="item.dt != null">DT, </if>
+				<if test="item.c_id != null">C_ID, </if>
+				<if test="item.c_dt != null">C_DT, </if>
+				<if test="item.u_dt != null">U_DT, </if>
+				<if test="item.state != null">STATE, </if>
+				<if test="item.location != null">LOCATION, </if>
+			</trim>
+			<trim prefix="VALUES (" suffix=")" suffixOverrides="," >
+				<if test="item.id != null">#{item.id}, </if>
+				<if test="item.name != null">#{item.name}, </if>
+				<if test="item.idnumber != null">#{item.idnumber}, </if>
+				<if test="item.img != null">#{item.img}, </if>
+				<if test="item.phone != null">#{item.phone}, </if>
+				<if test="item.inorout != null">#{item.inorout}, </if>
+				<if test="item.comment != null">#{item.comment}, </if>
+				<if test="item.cp_id != null">#{item.cp_id}, </if>
+				<if test="item.unit_id != null">#{item.unit_id}, </if>
+				<if test="item.dt != null">#{item.dt}, </if>
+				<if test="item.c_id != null">#{item.c_id}, </if>
+				<if test="item.c_dt != null">#{item.c_dt}, </if>
+				<if test="item.u_dt != null">#{item.u_dt}, </if>
+				<if test="item.state != null">#{item.state}, </if>
+				<if test="item.location != null">#{item.location}, </if>
+			</trim>
+		</foreach>
+	</insert>
+</mapper>
